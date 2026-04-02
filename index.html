@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="IfYouBought is the premium crypto what-if calculator for replaying legendary entries, ATH exits, and unreal gains with live market data."
+    />
+    <meta name="theme-color" content="#060912" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="IfYouBought | Replay the trade you still think about" />
+    <meta
+      property="og:description"
+      content="Pick a coin, set the buy date, and see what that crypto bet could be worth today, at ATH, or on a custom exit."
+    />
+    <meta
+      property="og:image"
+      content="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='630' viewBox='0 0 1200 630'%3E%3Cdefs%3E%3CradialGradient id='g1' cx='18%25' cy='20%25' r='90%25'%3E%3Cstop offset='0%25' stop-color='%230ea5e9'/%3E%3Cstop offset='50%25' stop-color='%23060912'/%3E%3Cstop offset='100%25' stop-color='%2302050a'/%3E%3C/radialGradient%3E%3ClinearGradient id='g2' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23f5b33a' stop-opacity='0.95'/%3E%3Cstop offset='100%25' stop-color='%2338bdf8' stop-opacity='0.95'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='1200' height='630' fill='url(%23g1)'/%3E%3Ccircle cx='930' cy='130' r='190' fill='%23f5b33a' fill-opacity='0.12'/%3E%3Ccircle cx='230' cy='500' r='220' fill='%2338bdf8' fill-opacity='0.16'/%3E%3Crect x='62' y='58' width='1076' height='514' rx='36' fill='rgba(7,12,23,0.68)' stroke='rgba(255,255,255,0.12)'/%3E%3Ctext x='112' y='196' fill='white' font-family='Arial, sans-serif' font-size='30' letter-spacing='6'%3EIFYOUBOUGHT%3C/text%3E%3Ctext x='112' y='308' fill='white' font-family='Arial, sans-serif' font-size='86' font-weight='700'%3EReplay the trade%3C/text%3E%3Ctext x='112' y='400' fill='white' font-family='Arial, sans-serif' font-size='86' font-weight='700'%3Eyou still think about.%3C/text%3E%3Ctext x='112' y='484' fill='rgba(232,237,245,0.82)' font-family='Arial, sans-serif' font-size='32'%3ESee what your crypto bet could be worth today, at ATH,%3C/text%3E%3Ctext x='112' y='526' fill='rgba(232,237,245,0.82)' font-family='Arial, sans-serif' font-size='32'%3Eor on a custom sell date.%3C/text%3E%3Crect x='804' y='408' width='254' height='80' rx='22' fill='url(%23g2)'/%3E%3Ctext x='848' y='458' fill='%2304060c' font-family='Arial, sans-serif' font-size='32' font-weight='700'%3EIfYouBought%3C/text%3E%3C/svg%3E"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="IfYouBought | Replay the trade you still think about" />
+    <meta
+      name="twitter:description"
+      content="Premium crypto what-if calculator with live prices, ATH exits, cinematic result cards, and screenshot-ready shares."
+    />
+    <meta
+      name="twitter:image"
+      content="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='630' viewBox='0 0 1200 630'%3E%3Cdefs%3E%3CradialGradient id='g1' cx='18%25' cy='20%25' r='90%25'%3E%3Cstop offset='0%25' stop-color='%230ea5e9'/%3E%3Cstop offset='50%25' stop-color='%23060912'/%3E%3Cstop offset='100%25' stop-color='%2302050a'/%3E%3C/radialGradient%3E%3ClinearGradient id='g2' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23f5b33a' stop-opacity='0.95'/%3E%3Cstop offset='100%25' stop-color='%2338bdf8' stop-opacity='0.95'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='1200' height='630' fill='url(%23g1)'/%3E%3Ccircle cx='930' cy='130' r='190' fill='%23f5b33a' fill-opacity='0.12'/%3E%3Ccircle cx='230' cy='500' r='220' fill='%2338bdf8' fill-opacity='0.16'/%3E%3Crect x='62' y='58' width='1076' height='514' rx='36' fill='rgba(7,12,23,0.68)' stroke='rgba(255,255,255,0.12)'/%3E%3Ctext x='112' y='196' fill='white' font-family='Arial, sans-serif' font-size='30' letter-spacing='6'%3EIFYOUBOUGHT%3C/text%3E%3Ctext x='112' y='308' fill='white' font-family='Arial, sans-serif' font-size='86' font-weight='700'%3EReplay the trade%3C/text%3E%3Ctext x='112' y='400' fill='white' font-family='Arial, sans-serif' font-size='86' font-weight='700'%3Eyou still think about.%3C/text%3E%3Ctext x='112' y='484' fill='rgba(232,237,245,0.82)' font-family='Arial, sans-serif' font-size='32'%3ESee what your crypto bet could be worth today, at ATH,%3C/text%3E%3Ctext x='112' y='526' fill='rgba(232,237,245,0.82)' font-family='Arial, sans-serif' font-size='32'%3Eor on a custom sell date.%3C/text%3E%3Crect x='804' y='408' width='254' height='80' rx='22' fill='url(%23g2)'/%3E%3Ctext x='848' y='458' fill='%2304060c' font-family='Arial, sans-serif' font-size='32' font-weight='700'%3EIfYouBought%3C/text%3E%3C/svg%3E"
+    />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23f5b33a'/%3E%3Cstop offset='100%25' stop-color='%2338bdf8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='18' fill='%23060a12'/%3E%3Crect x='6' y='6' width='52' height='52' rx='14' fill='none' stroke='url(%23g)' stroke-width='2'/%3E%3Cpath d='M19 18h10v28H19zm16 0h10v28H35z' fill='white'/%3E%3Cpath d='M16 18h32v8H16zM16 38h32v8H16z' fill='url(%23g)' fill-opacity='0.88'/%3E%3C/svg%3E"
+    />
+    <title>IfYouBought | Premium Crypto What-If Calculator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&amp;family=Manrope:wght@400;500;600;700;800&amp;family=Sora:wght@400;600;700;800&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+    <script defer src="./app.js"></script>
+  </head>
+  <body>
+    <div class="ambient ambient-one"></div>
+    <div class="ambient ambient-two"></div>
+    <div class="ambient ambient-three"></div>
+    <div class="noise-layer"></div>
+
+    <header class="site-header">
+      <a class="brand-lockup" href="#top" aria-label="IfYouBought home">
+        <span class="brand-mark" aria-hidden="true">
+          <span></span>
+          <span></span>
+        </span>
+        <span class="brand-copy">
+          <span class="brand-name">IfYouBought</span>
+          <span class="brand-tag">Replay the trade you still think about</span>
+        </span>
+      </a>
+      <div class="header-actions">
+        <div class="data-badge" id="liveDataBadge">
+          <span class="badge-dot"></span>
+          <span>Powered by live market data</span>
+        </div>
+        <a class="header-link" href="#regret">Hall of Regret</a>
+      </div>
+    </header>
+
+    <main id="top">
+      <section class="hero section">
+        <div class="hero-copy" data-reveal>
+          <p class="eyebrow">Premium crypto what-if calculator</p>
+          <h1>See what your crypto conviction could have become.</h1>
+          <p class="hero-lede">
+            Pick the coin. Set the buy date. Exit today, at the perfect high, or on any
+            custom day. The numbers land instantly and look built to be shared.
+          </p>
+          <div class="hero-rail">
+            <span>Live USD market data</span>
+            <span>ATH exit mode</span>
+            <span>Screenshot-ready result cards</span>
+          </div>
+          <p class="hero-note">
+            Daily historical pricing is pulled in real time. No fake gains, no made-up charts,
+            just the trade that got away.
+          </p>
+          <div class="ticker-strip card-surface" id="tickerStrip" aria-live="polite">
+            <span class="ticker-label">Live tape</span>
+            <div class="ticker-items" id="tickerItems">
+              <span class="ticker-skeleton"></span>
+              <span class="ticker-skeleton"></span>
+              <span class="ticker-skeleton"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="app-stage" data-reveal>
+          <section class="card-surface calculator-panel" aria-labelledby="calculator-title">
+            <div class="panel-topline">
+              <div>
+                <p class="panel-kicker">The setup</p>
+                <h2 id="calculator-title">Price the missed move.</h2>
+              </div>
+              <div class="panel-chip">Live data</div>
+            </div>
+
+            <form id="calculatorForm" novalidate>
+              <div class="field-group">
+                <label class="field-label" for="coinTrigger">Cryptocurrency</label>
+                <div class="coin-picker" id="coinPicker">
+                  <button
+                    class="coin-trigger"
+                    id="coinTrigger"
+                    type="button"
+                    aria-expanded="false"
+                    aria-haspopup="listbox"
+                  >
+                    <span class="coin-trigger-main">
+                      <span class="coin-orb" id="selectedCoinOrb"></span>
+                      <span class="coin-trigger-copy">
+                        <span class="coin-trigger-name" id="selectedCoinName">Bitcoin</span>
+                        <span class="coin-trigger-symbol" id="selectedCoinSymbol">BTC</span>
+                      </span>
+                    </span>
+                    <span class="trigger-caret" aria-hidden="true"></span>
+                  </button>
+                  <div class="coin-panel" id="coinPanel" hidden>
+                    <label class="search-shell" for="coinSearch">
+                      <span>Search</span>
+                      <input
+                        id="coinSearch"
+                        type="search"
+                        placeholder="Bitcoin, ETH, Solana..."
+                        autocomplete="off"
+                      />
+                    </label>
+                    <div
+                      class="coin-option-list"
+                      id="coinOptionList"
+                      role="listbox"
+                      aria-label="Choose a cryptocurrency"
+                    ></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="field-group">
+                <label class="field-label" for="amountInput">Amount invested</label>
+                <div class="input-shell money-shell">
+                  <span class="input-prefix">$</span>
+                  <input
+                    id="amountInput"
+                    name="amount"
+                    type="number"
+                    min="1"
+                    step="1"
+                    inputmode="decimal"
+                    placeholder="1000"
+                    required
+                  />
+                </div>
+                <div class="quick-pills" id="quickPills">
+                  <button type="button" class="pill-button" data-amount="100">$100</button>
+                  <button type="button" class="pill-button" data-amount="500">$500</button>
+                  <button type="button" class="pill-button active" data-amount="1000">$1,000</button>
+                  <button type="button" class="pill-button" data-amount="5000">$5,000</button>
+                  <button type="button" class="pill-button" data-amount="10000">$10,000</button>
+                </div>
+              </div>
+
+              <div class="field-group">
+                <label class="field-label" for="buyDateInput">Buy date</label>
+                <div class="input-shell">
+                  <input id="buyDateInput" name="buyDate" type="date" required />
+                </div>
+              </div>
+
+              <div class="field-group">
+                <span class="field-label">Sell mode</span>
+                <div class="mode-switch" role="radiogroup" aria-label="Sell mode">
+                  <label class="mode-pill active">
+                    <input type="radio" name="sellMode" value="today" checked />
+                    <span>Today</span>
+                  </label>
+                  <label class="mode-pill">
+                    <input type="radio" name="sellMode" value="ath" />
+                    <span>ATH</span>
+                  </label>
+                  <label class="mode-pill">
+                    <input type="radio" name="sellMode" value="custom" />
+                    <span>Custom date</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="field-group hidden" id="customDateGroup">
+                <label class="field-label" for="sellDateInput">Sell date</label>
+                <div class="input-shell">
+                  <input id="sellDateInput" name="sellDate" type="date" />
+                </div>
+              </div>
+
+              <div class="error-banner" id="formError" hidden></div>
+
+              <button class="primary-button" id="calculateButton" type="submit">
+                <span class="button-copy">Reveal the outcome</span>
+                <span class="button-glow" aria-hidden="true"></span>
+              </button>
+            </form>
+          </section>
+
+          <section
+            class="card-surface result-panel share-capture"
+            id="resultCard"
+            aria-live="polite"
+          >
+            <div class="result-loading" id="resultLoading" hidden>
+              <span class="loader-ring"></span>
+              <div class="loading-copy">
+                <p class="loading-label">Pulling the price history</p>
+                <p class="loading-detail">Matching buy date, live value, and the cleanest exit.</p>
+              </div>
+            </div>
+
+            <div class="result-empty" id="resultEmpty">
+              <div class="empty-orb"></div>
+              <p class="empty-kicker">The reveal</p>
+              <h2>The trade looks cinematic once the numbers land.</h2>
+              <p>
+                Pick an entry and this card will turn into your share-ready result, complete with
+                dramatic value, clean stats, and the full portfolio curve.
+              </p>
+              <div class="empty-stats">
+                <span>Value today</span>
+                <span>Perfect ATH exit</span>
+                <span>Custom sell date</span>
+              </div>
+            </div>
+
+            <div class="result-content" id="resultContent" hidden>
+              <div class="result-topline">
+                <span class="result-label" id="resultLabel">If you bought</span>
+                <div class="result-badges">
+                  <span class="result-badge" id="sentimentBadge">Legendary entry</span>
+                  <span class="result-badge muted" id="holdingBadge">Held 0 days</span>
+                </div>
+              </div>
+
+              <h2 class="result-headline" id="resultHeadline">Your $1,000 could have become...</h2>
+              <div class="result-value" id="resultValue">$0</div>
+              <p class="result-story" id="resultStory"></p>
+
+              <div class="result-stats" id="resultStats">
+                <article class="stat-card">
+                  <span class="stat-label">Profit / loss</span>
+                  <strong class="stat-value" id="statProfit">$0</strong>
+                </article>
+                <article class="stat-card">
+                  <span class="stat-label">ROI</span>
+                  <strong class="stat-value" id="statRoi">0%</strong>
+                </article>
+                <article class="stat-card">
+                  <span class="stat-label">Multiplier</span>
+                  <strong class="stat-value" id="statMultiplier">0x</strong>
+                </article>
+                <article class="stat-card">
+                  <span class="stat-label">Coins acquired</span>
+                  <strong class="stat-value" id="statCoins">0</strong>
+                </article>
+                <article class="stat-card">
+                  <span class="stat-label">Buy price</span>
+                  <strong class="stat-value" id="statBuyPrice">$0</strong>
+                </article>
+                <article class="stat-card">
+                  <span class="stat-label">Sell price</span>
+                  <strong class="stat-value" id="statSellPrice">$0</strong>
+                </article>
+              </div>
+
+              <div class="chart-shell">
+                <div class="chart-header">
+                  <div>
+                    <p class="chart-kicker">Portfolio curve</p>
+                    <h3 id="chartTitle">How the position would have traveled</h3>
+                  </div>
+                  <div class="chart-metrics">
+                    <span id="chartStartLabel">Start</span>
+                    <span id="chartEndLabel">End</span>
+                  </div>
+                </div>
+                <div class="chart-canvas" id="chartCanvas" aria-hidden="true"></div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section class="share-section section" data-reveal>
+        <div class="section-heading">
+          <p class="eyebrow">Share the number</p>
+          <h2>Built for posts, group chats, and screenshot flexes.</h2>
+          <p>
+            Once the result lands, turn it into a clean premium share in one tap. No cringe copy,
+            no meme noise, just brutal numbers.
+          </p>
+        </div>
+
+        <div class="share-grid">
+          <section class="card-surface share-card">
+            <div class="panel-topline">
+              <div>
+                <p class="panel-kicker">Share actions</p>
+                <h3>Send the trade around.</h3>
+              </div>
+              <div class="panel-chip">Ready after first result</div>
+            </div>
+            <p class="share-preview" id="sharePreview">
+              Run a scenario and this premium share line will update with your exact result.
+            </p>
+            <div class="share-actions">
+              <button type="button" class="action-button" id="shareXButton">Share on X</button>
+              <button type="button" class="action-button" id="copyTextButton">Copy share text</button>
+              <button type="button" class="action-button" id="copyLinkButton">Copy share link</button>
+              <button type="button" class="action-button" id="downloadImageButton">Download image</button>
+            </div>
+            <div class="share-feedback" id="shareFeedback" aria-live="polite"></div>
+          </section>
+
+          <section class="card-surface editorial-card">
+            <p class="panel-kicker">Why it spreads</p>
+            <h3>One clean card. One impossible number. Zero friction.</h3>
+            <p>
+              IfYouBought is designed to make every scenario feel like a story: the coin, the
+              missed date, the perfect exit, the line you cannot stop staring at.
+            </p>
+            <div class="editorial-points">
+              <span>Made for X</span>
+              <span>Fits Telegram drops</span>
+              <span>Looks sharp in Stories</span>
+              <span>Clean enough for Reddit</span>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section class="regret-section section" id="regret" data-reveal>
+        <div class="section-heading">
+          <p class="eyebrow">Hall of Regret</p>
+          <h2>Tap the entries everyone still replays in their head.</h2>
+          <p>
+            These presets drop the form into famous crypto moments instantly. Pick one and let the
+            calculator do the damage.
+          </p>
+        </div>
+        <div class="preset-grid" id="presetGrid"></div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div>
+        <p class="footer-brand">IfYouBought</p>
+        <p class="footer-copy">
+          Premium crypto what-if calculator for educational and entertainment use.
+        </p>
+      </div>
+      <div class="footer-meta">
+        <p>Historical pricing uses daily USD market data. ATH mode uses the highest daily high after the buy date.</p>
+        <p>Current price and historical data powered by CryptoCompare public endpoints.</p>
+        <p>Not financial advice. Actual execution prices, slippage, and taxes are not included.</p>
+      </div>
+    </footer>
+  </body>
+</html>

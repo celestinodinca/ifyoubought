@@ -1,0 +1,9 @@
+{
+  "name": "ifyoubought",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Premium crypto what-if calculator with a minimal Node market-data proxy.",
+  "scripts": {
+    "start": "node server.js"
+  }
+}
