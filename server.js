@@ -167,9 +167,12 @@ async function handleStatic(req, requestUrl, res) {
     const content = await fsPromises.readFile(targetPath);
     const extension = path.extname(targetPath).toLowerCase();
     const contentType = STATIC_TYPES[extension] || "application/octet-stream";
+    const cacheControl = new Set([".html", ".css", ".js"]).has(extension)
+      ? "no-cache"
+      : "public, max-age=300";
     res.writeHead(200, {
       "Content-Type": contentType,
-      "Cache-Control": extension === ".html" ? "no-cache" : "public, max-age=300",
+      "Cache-Control": cacheControl,
     });
     res.end(content);
   } catch (error) {
