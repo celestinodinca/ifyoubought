@@ -295,6 +295,9 @@ function buildOgImage(preview) {
   const accentB = visual.accentB;
   const headline = buildShareHeadline(theme, profit);
   const exitLine = preview ? describeExitForImage(theme) : "Today, ATH, or any custom exit";
+  const exitCardLabel = buildExitCardLabel(theme);
+  const exitCardDate = buildExitCardDate(theme);
+  const chartRangeLine = buildChartRangeLine(theme);
   const scenarioLine = preview
     ? `Bought ${formatShareDate(theme.buyDate)}  •  ${describeExitForCard(theme)}`
     : "Buy any date  •  Exit today, ATH, or custom";
@@ -358,7 +361,7 @@ function buildOgImage(preview) {
   <rect x="107" y="104" width="18" height="28" rx="7" fill="#f8fbff"/>
   <text x="170" y="113" fill="rgba(255,255,255,0.96)" font-family="Arial, sans-serif" font-size="24" font-weight="700">IfYouBought</text>
   <text x="170" y="142" fill="rgba(232,237,245,0.60)" font-family="Arial, sans-serif" font-size="16">${escapeXml(
-    truncateText(visual.subtitle, 46)
+    truncateText(visual.subtitle, 36)
   )}</text>
 
   <rect x="930" y="88" width="178" height="42" rx="21" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.10)"/>
@@ -385,9 +388,9 @@ function buildOgImage(preview) {
     truncateText(scenarioLine, 42)
   )}</text>
 
-  <rect x="92" y="534" width="160" height="24" rx="12" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)"/>
-  <text x="172" y="551" fill="rgba(232,237,245,0.78)" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" letter-spacing="2">${escapeXml(
-    exitLine.toUpperCase()
+  <rect x="92" y="530" width="184" height="28" rx="14" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)"/>
+  <text x="184" y="549" fill="rgba(232,237,245,0.78)" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" letter-spacing="2">${escapeXml(
+    truncateText(exitCardLabel, 16)
   )}</text>
 
   <rect x="750" y="144" width="154" height="86" rx="24" fill="rgba(255,255,255,0.035)" stroke="rgba(255,255,255,0.08)"/>
@@ -412,14 +415,17 @@ function buildOgImage(preview) {
 
   <rect x="922" y="248" width="154" height="86" rx="24" fill="rgba(255,255,255,0.035)" stroke="rgba(255,255,255,0.08)"/>
   <text x="948" y="278" fill="rgba(232,237,245,0.56)" font-family="Arial, sans-serif" font-size="16" font-weight="700" letter-spacing="2">EXIT</text>
-  <text x="948" y="318" fill="rgba(255,255,255,0.92)" font-family="Arial, sans-serif" font-size="28" font-weight="700">${escapeXml(
-    truncateText(exitLine, 12)
+  <text x="948" y="309" fill="rgba(255,255,255,0.92)" font-family="Arial, sans-serif" font-size="24" font-weight="700">${escapeXml(
+    truncateText(exitCardLabel, 10)
+  )}</text>
+  <text x="948" y="328" fill="rgba(232,237,245,0.62)" font-family="Arial, sans-serif" font-size="16" font-weight="700">${escapeXml(
+    truncateText(exitCardDate, 10)
   )}</text>
 
   <rect x="750" y="352" width="326" height="162" rx="28" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.08)"/>
   <text x="776" y="382" fill="rgba(232,237,245,0.56)" font-family="Arial, sans-serif" font-size="16" font-weight="700" letter-spacing="2">PORTFOLIO CURVE</text>
   <text x="776" y="410" fill="rgba(255,255,255,0.90)" font-family="Arial, sans-serif" font-size="24" font-weight="700">${escapeXml(
-    truncateText(`${formatShareDate(theme.buyDate)} to ${exitLine}`, 22)
+    truncateText(chartRangeLine, 24)
   )}</text>
   <line x1="776" y1="452" x2="1050" y2="452" stroke="rgba(255,255,255,0.08)" stroke-dasharray="4 10"/>
   <line x1="776" y1="486" x2="1050" y2="486" stroke="rgba(255,255,255,0.08)" stroke-dasharray="4 10"/>
@@ -435,7 +441,7 @@ function buildOgImage(preview) {
   )}</text>
 
   <rect x="750" y="532" width="326" height="30" rx="15" fill="rgba(255,255,255,0.035)" stroke="rgba(255,255,255,0.06)"/>
-  <text x="776" y="552" fill="rgba(232,237,245,0.72)" font-family="Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="2">IF YOU BOUGHT // REPLAY THE TRADE YOU STILL THINK ABOUT</text>
+  <text x="776" y="552" fill="rgba(232,237,245,0.72)" font-family="Arial, sans-serif" font-size="13" font-weight="700" letter-spacing="2">IFYOUBOUGHT // REPLAY THE TRADE</text>
 </svg>`;
 }
 
@@ -533,6 +539,36 @@ function describeExitForCard(preview) {
   return `Sold ${formatShareDate(preview.sellDate || preview.buyDate)}`;
 }
 
+function buildExitCardLabel(preview) {
+  if (preview.mode === "ath") {
+    return "ATH EXIT";
+  }
+
+  if (preview.mode === "today") {
+    return "HOLD TO TODAY";
+  }
+
+  return "CUSTOM EXIT";
+}
+
+function buildExitCardDate(preview) {
+  if (preview.mode === "today") {
+    return "Today";
+  }
+
+  return formatShortShareDate(preview.exitDate || preview.sellDate || preview.buyDate);
+}
+
+function buildChartRangeLine(preview) {
+  const start = formatShortShareDate(preview.buyDate);
+
+  if (preview.mode === "today") {
+    return `${start} to Today`;
+  }
+
+  return `${start} to ${formatShortShareDate(preview.exitDate || preview.sellDate || preview.buyDate)}`;
+}
+
 function getShareVisualState(preview, profit, multiplier) {
   const isNegative = profit < 0;
   const isHuge = preview.exitValue >= 1_000_000 || preview.roi >= 10_000;
@@ -554,7 +590,7 @@ function getShareVisualState(preview, profit, multiplier) {
     return {
       label: isHuge ? "PERFECT EXIT" : "CAUGHT THE PEAK",
       eyebrow: "THE CLEANEST POSSIBLE SELL",
-      subtitle: "If hindsight traded perfectly, this is the number.",
+      subtitle: "The clean hindsight number.",
       accentA,
       accentB,
       metricColor: "#8df4d0",
@@ -565,7 +601,7 @@ function getShareVisualState(preview, profit, multiplier) {
     return {
       label: "MISSED MILLIONS",
       eyebrow: "THE TRADE THAT GOT AWAY",
-      subtitle: "The screenshot that makes the feed stop.",
+      subtitle: "The screenshot that stops the feed.",
       accentA,
       accentB,
       metricColor: "#8df4d0",
@@ -576,7 +612,7 @@ function getShareVisualState(preview, profit, multiplier) {
     return {
       label: "LEGENDARY HOLD",
       eyebrow: "CONVICTION AGED WELL",
-      subtitle: "Built to look unmistakably like IfYouBought.",
+      subtitle: "The unmistakable IfYouBought card.",
       accentA,
       accentB,
       metricColor: "#8df4d0",
@@ -702,6 +738,17 @@ function formatShareDate(dateString) {
     year: "numeric",
     timeZone: "UTC",
   }).format(new Date(Date.UTC(year, month - 1, day)));
+}
+
+function formatShortShareDate(dateString) {
+  const [year, month, day] = dateString.split("-").map(Number);
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    year: "2-digit",
+    timeZone: "UTC",
+  })
+    .format(new Date(Date.UTC(year, month - 1, day)))
+    .replace(",", " '");
 }
 
 function truncateText(value, maxLength) {
