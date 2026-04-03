@@ -88,16 +88,17 @@
             Daily historical pricing is pulled in real time. No fake gains, no made-up charts,
             just the trade that got away.
           </p>
-          <div class="ticker-strip card-surface" id="tickerStrip" aria-live="polite">
-            <span class="ticker-label">Live tape</span>
-            <div class="ticker-marquee">
-              <div class="ticker-items" id="tickerItems">
-                <span class="ticker-skeleton"></span>
-                <span class="ticker-skeleton"></span>
-                <span class="ticker-skeleton"></span>
-                <span class="ticker-skeleton"></span>
-                <span class="ticker-skeleton"></span>
-              </div>
+        </div>
+
+        <div class="ticker-strip card-surface" id="tickerStrip" aria-live="polite" data-reveal>
+          <span class="ticker-label">Live tape</span>
+          <div class="ticker-marquee">
+            <div class="ticker-items" id="tickerItems">
+              <span class="ticker-skeleton"></span>
+              <span class="ticker-skeleton"></span>
+              <span class="ticker-skeleton"></span>
+              <span class="ticker-skeleton"></span>
+              <span class="ticker-skeleton"></span>
             </div>
           </div>
         </div>
@@ -327,7 +328,8 @@
               Run a scenario and this premium share line will update with your exact result.
             </p>
             <div class="share-actions">
-              <button type="button" class="action-button" id="shareXButton">Share on X</button>
+              <button type="button" class="action-button" id="shareXButton">Share link on X</button>
+              <button type="button" class="action-button" id="shareImageXButton">Share image on X</button>
               <button type="button" class="action-button" id="copyTextButton">Copy share text</button>
               <button type="button" class="action-button" id="copyLinkButton">Copy share link</button>
               <button type="button" class="action-button" id="downloadImageButton">Download image</button>

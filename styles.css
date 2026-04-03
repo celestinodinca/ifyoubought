@@ -382,7 +382,7 @@ h1 {
 .ticker-strip {
   display: grid;
   gap: 12px;
-  margin-top: 34px;
+  width: 100%;
   padding: 16px 0 16px 22px;
 }
 
@@ -1002,6 +1002,7 @@ h1 {
 }
 
 .result-value {
+  display: inline-block;
   max-width: 100%;
   font-family: var(--font-display);
   font-size: clamp(2.8rem, 5.4vw, 5rem);
@@ -1010,12 +1011,15 @@ h1 {
   letter-spacing: -0.05em;
   overflow-wrap: anywhere;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(81, 210, 255, 0.92));
+  -webkit-background-clip: text;
   background-clip: text;
+  color: transparent;
   -webkit-text-fill-color: transparent;
 }
 
 .result-panel[data-tone="negative"] .result-value {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(255, 102, 138, 0.88));
+  -webkit-background-clip: text;
   background-clip: text;
 }
 

@@ -241,6 +241,7 @@ function cacheDom() {
   dom.sharePreview = document.querySelector("#sharePreview");
   dom.shareFeedback = document.querySelector("#shareFeedback");
   dom.shareXButton = document.querySelector("#shareXButton");
+  dom.shareImageXButton = document.querySelector("#shareImageXButton");
   dom.copyTextButton = document.querySelector("#copyTextButton");
   dom.copyLinkButton = document.querySelector("#copyLinkButton");
   dom.downloadImageButton = document.querySelector("#downloadImageButton");
@@ -326,6 +327,7 @@ function bindEvents() {
   });
 
   dom.shareXButton.addEventListener("click", shareToX);
+  dom.shareImageXButton.addEventListener("click", shareImageToX);
   dom.copyTextButton.addEventListener("click", () => copyShare("text"));
   dom.copyLinkButton.addEventListener("click", () => copyShare("link"));
   dom.downloadImageButton.addEventListener("click", downloadShareCard);
@@ -1018,6 +1020,52 @@ async function shareToX() {
   window.open(shareTarget, "_blank", "noopener,noreferrer");
 }
 
+async function shareImageToX() {
+  if (!state.latestResult) {
+    flashShareFeedback("Run a scenario before you share it.");
+    return;
+  }
+
+  flashShareFeedback("Preparing the share image...");
+
+  try {
+    const shareFile = await buildShareImageFile();
+
+    if (
+      navigator.share &&
+      navigator.canShare &&
+      navigator.canShare({
+        files: [shareFile],
+      })
+    ) {
+      await navigator.share({
+        files: [shareFile],
+        title: "IfYouBought",
+        text: state.shareText,
+      });
+      flashShareFeedback("Share sheet opened with the image.");
+      return;
+    }
+
+    const blob = await fileToBlob(shareFile);
+    const copied = await copyImageBlobToClipboard(blob);
+    const shareTarget = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+      state.shareText
+    )}&url=${encodeURIComponent(state.shareUrl)}`;
+    window.open(shareTarget, "_blank", "noopener,noreferrer");
+
+    if (copied) {
+      flashShareFeedback("Image copied. Paste it into the X composer with Cmd+V.");
+      return;
+    }
+
+    triggerFileDownload(shareFile);
+    flashShareFeedback("Image downloaded. Attach it in the X composer that just opened.");
+  } catch (error) {
+    flashShareFeedback("Share image failed. Try again in a moment.");
+  }
+}
+
 async function copyShare(type) {
   if (!state.latestResult) {
     flashShareFeedback("Run a scenario before you copy it.");
@@ -1040,37 +1088,127 @@ async function downloadShareCard() {
     return;
   }
 
-  flashShareFeedback("Rendering share card...");
+  flashShareFeedback("Preparing image...");
 
   try {
-    const html2canvas = await loadHtml2Canvas();
-    const canvas = await html2canvas(dom.resultCard, {
-      backgroundColor: "#04070f",
-      scale: 2,
-      useCORS: true,
-    });
-    const link = document.createElement("a");
-    link.download = `ifyoubought-${state.latestResult.coin.symbol.toLowerCase()}-${state.latestResult.sellMode}.png`;
-    link.href = canvas.toDataURL("image/png");
-    link.click();
+    const shareFile = await buildShareImageFile();
+    triggerFileDownload(shareFile);
     flashShareFeedback("Share card downloaded.");
   } catch (error) {
     flashShareFeedback("Image export failed. Try again in a moment.");
   }
 }
 
-async function loadHtml2Canvas() {
-  if (window.html2canvas) {
-    return window.html2canvas;
+async function buildShareImageFile() {
+  const imageBlob = await getShareImageBlob();
+  return new File(
+    [imageBlob],
+    `ifyoubought-${state.latestResult.coin.symbol.toLowerCase()}-${state.latestResult.sellMode}.png`,
+    { type: "image/png" }
+  );
+}
+
+async function getShareImageBlob() {
+  if (!state.latestResult) {
+    throw new Error("No share result available.");
   }
 
-  return new Promise((resolve, reject) => {
-    const script = document.createElement("script");
-    script.src = "https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js";
-    script.onload = () => resolve(window.html2canvas);
-    script.onerror = () => reject(new Error("Unable to load html2canvas."));
-    document.head.append(script);
+  const svgUrl = buildShareImageUrl();
+  const response = await fetch(svgUrl, {
+    headers: {
+      Accept: "image/svg+xml",
+    },
   });
+
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}`);
+  }
+
+  const svgMarkup = await response.text();
+  return renderSvgToPngBlob(svgMarkup, 1200, 630);
+}
+
+function buildShareImageUrl() {
+  const sharePageUrl = new URL(state.shareUrl || window.location.href, window.location.origin);
+  const imageUrl = new URL("/og/share.svg", window.location.origin);
+  imageUrl.search = sharePageUrl.search;
+  return imageUrl.toString();
+}
+
+async function renderSvgToPngBlob(svgMarkup, width, height) {
+  const svgBlob = new Blob([svgMarkup], { type: "image/svg+xml;charset=utf-8" });
+  const objectUrl = URL.createObjectURL(svgBlob);
+
+  try {
+    const image = await loadImage(objectUrl);
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const context = canvas.getContext("2d");
+
+    if (!context) {
+      throw new Error("Canvas unavailable.");
+    }
+
+    context.clearRect(0, 0, width, height);
+    context.drawImage(image, 0, 0, width, height);
+
+    return await new Promise((resolve, reject) => {
+      canvas.toBlob((blob) => {
+        if (blob) {
+          resolve(blob);
+          return;
+        }
+        reject(new Error("PNG encoding failed."));
+      }, "image/png");
+    });
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
+}
+
+function loadImage(source) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error("Image load failed."));
+    image.src = source;
+  });
+}
+
+function triggerFileDownload(file) {
+  const downloadUrl = URL.createObjectURL(file);
+  const link = document.createElement("a");
+  link.download = file.name;
+  link.href = downloadUrl;
+  link.click();
+  window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000);
+}
+
+async function copyImageBlobToClipboard(blob) {
+  if (!window.ClipboardItem || !navigator.clipboard?.write) {
+    return false;
+  }
+
+  try {
+    await navigator.clipboard.write([
+      new ClipboardItem({
+        [blob.type]: blob,
+      }),
+    ]);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+async function fileToBlob(file) {
+  if (typeof file.arrayBuffer === "function") {
+    const buffer = await file.arrayBuffer();
+    return new Blob([buffer], { type: file.type });
+  }
+
+  return file;
 }
 
 async function refreshLiveTicker() {
