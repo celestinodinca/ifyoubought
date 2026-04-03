@@ -381,9 +381,9 @@ h1 {
 
 .ticker-strip {
   display: grid;
-  gap: 14px;
+  gap: 12px;
   margin-top: 34px;
-  padding: 18px 18px 18px 22px;
+  padding: 16px 0 16px 22px;
 }
 
 .ticker-label {
@@ -394,38 +394,72 @@ h1 {
   text-transform: uppercase;
 }
 
+.ticker-marquee {
+  position: relative;
+  overflow: hidden;
+  padding-right: 18px;
+  mask-image: linear-gradient(90deg, transparent 0, black 6%, black 94%, transparent 100%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, black 6%, black 94%, transparent 100%);
+}
+
 .ticker-items {
-  display: flex;
-  flex-wrap: wrap;
+  display: inline-flex;
+  align-items: center;
   gap: 12px;
+  width: max-content;
+  flex-wrap: nowrap;
+  animation: ticker-scroll var(--ticker-duration, 38s) linear infinite;
+  will-change: transform;
+}
+
+.ticker-strip:hover .ticker-items {
+  animation-play-state: paused;
 }
 
 .ticker-item,
 .ticker-skeleton {
-  min-width: 120px;
-  padding: 11px 14px;
+  flex: 0 0 auto;
+  min-width: 184px;
+  padding: 12px 14px;
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(255, 255, 255, 0.03);
 }
 
 .ticker-item {
-  display: grid;
-  gap: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
 }
 
-.ticker-item strong {
+.ticker-symbol {
   font-family: var(--font-display);
   font-size: 0.98rem;
+  letter-spacing: -0.03em;
 }
 
-.ticker-item span {
+.ticker-price {
+  color: var(--text);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.ticker-change {
   color: var(--text-faint);
   font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.ticker-change.positive {
+  color: #8df4d0;
+}
+
+.ticker-change.negative {
+  color: #ff9cb4;
 }
 
 .ticker-skeleton {
-  height: 60px;
+  height: 50px;
   background:
     linear-gradient(90deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.03));
   background-size: 240px 100%;
@@ -1435,16 +1469,10 @@ h1 {
     justify-content: flex-start;
   }
 
-  .ticker-items,
   .quick-pills,
   .share-actions {
     display: grid;
     grid-template-columns: 1fr 1fr;
-  }
-
-  .ticker-item,
-  .ticker-skeleton {
-    min-width: 0;
   }
 
   .ticker-strip,
@@ -1464,6 +1492,15 @@ h1 {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+@keyframes ticker-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(calc(-50% - 6px));
   }
 }
 

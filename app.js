@@ -1,7 +1,7 @@
 const API_BASE = "/api/market";
 const EXTRA_PARAMS = "IfYouBought";
 const DAY_SECONDS = 86400;
-const LIVE_TICKERS = ["BTC", "ETH", "SOL"];
+const LIVE_TICKERS = ["BTC", "ETH", "SOL", "BNB", "XRP", "ADA", "DOGE", "AVAX", "LINK", "DOT", "SUI", "PEPE"];
 const COIN_SEARCH_LIMIT = 120;
 
 const FEATURED_COINS = [
@@ -1074,26 +1074,34 @@ async function loadHtml2Canvas() {
 }
 
 async function refreshLiveTicker() {
-  const url = `${API_BASE}/pricemulti?fsyms=${LIVE_TICKERS.join(",")}&tsyms=USD&extraParams=${encodeURIComponent(
+  const url = `${API_BASE}/pricemultifull?fsyms=${LIVE_TICKERS.join(",")}&tsyms=USD&extraParams=${encodeURIComponent(
     EXTRA_PARAMS
   )}`;
 
   try {
     const payload = await fetchJson(url);
-    dom.tickerItems.innerHTML = LIVE_TICKERS.map((symbol) => {
+    const tickerMarkup = LIVE_TICKERS.map((symbol) => {
       const coin = getCoinBySymbol(symbol);
-      const price = Number(payload[symbol]?.USD || 0);
+      const snapshot = payload.RAW?.[symbol]?.USD;
+      const price = Number(snapshot?.PRICE || 0);
+      const change = Number(snapshot?.CHANGEPCT24HOUR || 0);
       return `
         <div class="ticker-item">
-          <strong>${coin.name} <span style="color: rgba(232, 237, 245, 0.48); font-size: 0.82rem;">${coin.symbol}</span></strong>
-          <span>${price ? formatCurrencyPrecise(price) : "Unavailable"}</span>
+          <strong class="ticker-symbol">${coin ? coin.symbol : symbol}</strong>
+          <span class="ticker-price">${price ? formatCurrencyPrecise(price) : "Unavailable"}</span>
+          <span class="ticker-change ${change >= 0 ? "positive" : "negative"}">${
+            Number.isFinite(change) ? formatTickerChange(change) : "0.00%"
+          }</span>
         </div>
       `;
     }).join("");
+
+    dom.tickerItems.innerHTML = `${tickerMarkup}${tickerMarkup}`;
+    dom.tickerItems.style.setProperty("--ticker-duration", `${Math.max(36, LIVE_TICKERS.length * 4.8)}s`);
     dom.liveDataBadge.textContent = `Powered by live market data | Updated ${formatClock(new Date())}`;
   } catch (error) {
     dom.tickerItems.innerHTML =
-      '<span class="coin-option-note" style="padding: 4px 2px;">Live tape unavailable right now.</span>';
+      '<span class="coin-option-note" style="padding: 4px 20px 4px 2px;">Live tape unavailable right now.</span>';
     dom.liveDataBadge.textContent = "Powered by live market data";
   }
 }
@@ -1408,6 +1416,11 @@ function formatSocialCurrency(value) {
     minimumFractionDigits: 0,
     maximumFractionDigits: Math.abs(value) >= 1000000 ? 1 : 0,
   }).format(value);
+}
+
+function formatTickerChange(value) {
+  const sign = value >= 0 ? "+" : "-";
+  return `${sign}${Math.abs(value).toFixed(Math.abs(value) >= 100 ? 0 : 2)}%`;
 }
 
 function formatCount(value) {
