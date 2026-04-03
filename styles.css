@@ -440,7 +440,7 @@ h1 {
 }
 
 .app-stage > .calculator-panel {
-  width: min(100%, 760px);
+  width: 100%;
   justify-self: start;
 }
 
@@ -470,9 +470,32 @@ h1 {
   line-height: 1.02;
 }
 
+.calculator-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px 18px;
+  align-items: start;
+}
+
 .field-group {
   position: relative;
-  margin-top: 22px;
+  margin-top: 0;
+}
+
+.calculator-form > .field-group:nth-of-type(1),
+.calculator-form > .field-group:nth-of-type(2) {
+  grid-column: span 1;
+}
+
+.calculator-form > .field-group:nth-of-type(3),
+.calculator-form > .field-group:nth-of-type(4) {
+  grid-column: span 1;
+}
+
+.calculator-form > .field-group:nth-of-type(5),
+.calculator-form > .error-banner,
+.calculator-form > .primary-button {
+  grid-column: 1 / -1;
 }
 
 .field-label {
@@ -611,7 +634,7 @@ h1 {
   justify-content: center;
   width: 100%;
   min-height: 62px;
-  margin-top: 26px;
+  margin-top: 4px;
   border: 0;
   border-radius: 20px;
   background: linear-gradient(135deg, rgba(245, 179, 58, 0.98), rgba(81, 210, 255, 0.94));
@@ -1348,6 +1371,11 @@ h1 {
   .share-card,
   .editorial-card {
     padding: 22px;
+  }
+
+  .calculator-form {
+    grid-template-columns: 1fr;
+    gap: 22px;
   }
 
   .mode-switch {
