@@ -150,20 +150,29 @@ main,
 }
 
 .site-header {
-  position: sticky;
+  position: fixed;
+  left: 50%;
   top: 18px;
+  transform: translateX(-50%);
   z-index: 20;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 20px;
   padding: 16px 20px;
-  margin-top: 18px;
+  margin-top: 0;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 999px;
-  background: rgba(6, 10, 18, 0.58);
-  backdrop-filter: blur(20px);
-  box-shadow: 0 14px 44px rgba(0, 0, 0, 0.22);
+  background: rgba(6, 10, 18, 0.52);
+  backdrop-filter: blur(22px);
+  box-shadow: 0 14px 44px rgba(0, 0, 0, 0.18);
+  transition: background 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.site-header.is-scrolled {
+  background: rgba(6, 10, 18, 0.36);
+  border-color: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.14);
 }
 
 .brand-lockup {
@@ -277,6 +286,10 @@ main,
 
 .section {
   padding: 96px 0 0;
+}
+
+main {
+  padding-top: 108px;
 }
 
 .hero {
@@ -1402,6 +1415,10 @@ h1 {
 
   .section {
     padding-top: 72px;
+  }
+
+  main {
+    padding-top: 96px;
   }
 
   .calculator-panel,

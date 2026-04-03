@@ -194,11 +194,14 @@ async function init() {
   setResultView("empty");
   refreshLiveTicker();
   window.setInterval(refreshLiveTicker, 90000);
+  window.addEventListener("scroll", syncHeaderState, { passive: true });
+  syncHeaderState();
   await loadCoinUniverse();
   hydrateSharedScenario();
 }
 
 function cacheDom() {
+  dom.siteHeader = document.querySelector(".site-header");
   dom.form = document.querySelector("#calculatorForm");
   dom.amountInput = document.querySelector("#amountInput");
   dom.buyDateInput = document.querySelector("#buyDateInput");
@@ -1026,33 +1029,16 @@ async function shareImageToX() {
     return;
   }
 
+  const shareTarget = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+    state.shareText
+  )}&url=${encodeURIComponent(state.shareUrl)}`;
+  window.open(shareTarget, "_blank", "noopener,noreferrer");
   flashShareFeedback("Preparing the share image...");
 
   try {
     const shareFile = await buildShareImageFile();
-
-    if (
-      navigator.share &&
-      navigator.canShare &&
-      navigator.canShare({
-        files: [shareFile],
-      })
-    ) {
-      await navigator.share({
-        files: [shareFile],
-        title: "IfYouBought",
-        text: state.shareText,
-      });
-      flashShareFeedback("Share sheet opened with the image.");
-      return;
-    }
-
     const blob = await fileToBlob(shareFile);
     const copied = await copyImageBlobToClipboard(blob);
-    const shareTarget = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-      state.shareText
-    )}&url=${encodeURIComponent(state.shareUrl)}`;
-    window.open(shareTarget, "_blank", "noopener,noreferrer");
 
     if (copied) {
       flashShareFeedback("Image copied. Paste it into the X composer with Cmd+V.");
@@ -1062,7 +1048,7 @@ async function shareImageToX() {
     triggerFileDownload(shareFile);
     flashShareFeedback("Image downloaded. Attach it in the X composer that just opened.");
   } catch (error) {
-    flashShareFeedback("Share image failed. Try again in a moment.");
+    flashShareFeedback("X composer opened, but image prep failed. Use Download image as fallback.");
   }
 }
 
@@ -1136,34 +1122,44 @@ function buildShareImageUrl() {
 }
 
 async function renderSvgToPngBlob(svgMarkup, width, height) {
-  const svgBlob = new Blob([svgMarkup], { type: "image/svg+xml;charset=utf-8" });
-  const objectUrl = URL.createObjectURL(svgBlob);
+  const image = await loadSvgImage(svgMarkup);
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const context = canvas.getContext("2d");
+
+  if (!context) {
+    throw new Error("Canvas unavailable.");
+  }
+
+  context.clearRect(0, 0, width, height);
+  context.drawImage(image, 0, 0, width, height);
+
+  return await new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (blob) {
+        resolve(blob);
+        return;
+      }
+      reject(new Error("PNG encoding failed."));
+    }, "image/png");
+  });
+}
+
+async function loadSvgImage(svgMarkup) {
+  const dataUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgMarkup)}`;
 
   try {
-    const image = await loadImage(objectUrl);
-    const canvas = document.createElement("canvas");
-    canvas.width = width;
-    canvas.height = height;
-    const context = canvas.getContext("2d");
+    return await loadImage(dataUrl);
+  } catch (error) {
+    const svgBlob = new Blob([svgMarkup], { type: "image/svg+xml;charset=utf-8" });
+    const objectUrl = URL.createObjectURL(svgBlob);
 
-    if (!context) {
-      throw new Error("Canvas unavailable.");
+    try {
+      return await loadImage(objectUrl);
+    } finally {
+      URL.revokeObjectURL(objectUrl);
     }
-
-    context.clearRect(0, 0, width, height);
-    context.drawImage(image, 0, 0, width, height);
-
-    return await new Promise((resolve, reject) => {
-      canvas.toBlob((blob) => {
-        if (blob) {
-          resolve(blob);
-          return;
-        }
-        reject(new Error("PNG encoding failed."));
-      }, "image/png");
-    });
-  } finally {
-    URL.revokeObjectURL(objectUrl);
   }
 }
 
@@ -1209,6 +1205,14 @@ async function fileToBlob(file) {
   }
 
   return file;
+}
+
+function syncHeaderState() {
+  if (!dom.siteHeader) {
+    return;
+  }
+
+  dom.siteHeader.classList.toggle("is-scrolled", window.scrollY > 24);
 }
 
 async function refreshLiveTicker() {
