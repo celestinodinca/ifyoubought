@@ -248,9 +248,7 @@ main,
 .data-badge,
 .header-link,
 .panel-chip,
-.hero-rail span,
 .result-badge,
-.editorial-points span,
 .empty-stats span {
   display: inline-flex;
   align-items: center;
@@ -285,22 +283,22 @@ main,
 }
 
 .section {
-  padding: 96px 0 0;
+  padding: 84px 0 0;
 }
 
 main {
-  padding-top: 108px;
+  padding-top: 104px;
 }
 
 .hero {
   display: grid;
-  gap: 42px;
+  gap: 24px;
   align-items: start;
-  padding-top: 80px;
+  padding-top: 44px;
 }
 
 .hero-copy {
-  max-width: 710px;
+  max-width: 640px;
 }
 
 .eyebrow,
@@ -324,14 +322,13 @@ h3 {
 }
 
 h1 {
-  max-width: 12ch;
-  font-size: clamp(3.25rem, 6vw, 6.5rem);
-  line-height: 0.96;
+  max-width: 10ch;
+  font-size: clamp(2.45rem, 4.8vw, 4.8rem);
+  line-height: 0.94;
 }
 
 .hero-lede,
 .section-heading p,
-.editorial-card p,
 .share-preview,
 .result-story,
 .footer-copy,
@@ -342,23 +339,9 @@ h1 {
 }
 
 .hero-lede {
-  max-width: 58ch;
-  margin-top: 20px;
-  font-size: clamp(1.02rem, 2vw, 1.2rem);
-}
-
-.hero-rail {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 28px;
-}
-
-.hero-note {
-  margin: 22px 0 0;
-  max-width: 60ch;
-  color: var(--text-faint);
-  font-size: 0.98rem;
+  max-width: 46ch;
+  margin-top: 14px;
+  font-size: clamp(0.98rem, 1.4vw, 1.08rem);
 }
 
 .card-surface {
@@ -482,7 +465,7 @@ h1 {
 .app-stage {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 30px;
+  gap: 24px;
   align-items: start;
 }
 
@@ -497,8 +480,7 @@ h1 {
 
 .calculator-panel,
 .result-panel,
-.share-card,
-.editorial-card {
+.share-card {
   padding: 28px;
 }
 
@@ -1172,7 +1154,7 @@ h1 {
 .share-section .section-heading,
 .regret-section .section-heading {
   display: grid;
-  gap: 14px;
+  gap: 10px;
   max-width: 760px;
 }
 
@@ -1183,9 +1165,10 @@ h1 {
 
 .share-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+  grid-template-columns: 1fr;
   gap: 24px;
-  margin-top: 28px;
+  max-width: 880px;
+  margin-top: 24px;
 }
 
 .share-preview {
@@ -1217,21 +1200,9 @@ h1 {
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.14);
 }
 
-.editorial-card h3,
 .share-card h3 {
   font-size: 1.65rem;
   line-height: 1;
-}
-
-.editorial-card p {
-  margin-top: 14px;
-}
-
-.editorial-points {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 20px;
 }
 
 .preset-grid {
@@ -1346,14 +1317,13 @@ h1 {
 
 @media (max-width: 1100px) {
   .app-stage,
-  .share-grid,
   .site-footer,
   .preset-grid {
     grid-template-columns: 1fr;
   }
 
   .hero {
-    padding-top: 56px;
+    padding-top: 32px;
   }
 
   .result-stats {
@@ -1423,8 +1393,7 @@ h1 {
 
   .calculator-panel,
   .result-panel,
-  .share-card,
-  .editorial-card {
+  .share-card {
     padding: 22px;
   }
 
@@ -1478,13 +1447,7 @@ h1 {
     justify-content: flex-start;
   }
 
-  .hero-rail {
-    gap: 10px;
-  }
-
-  .hero-rail span,
   .result-badge,
-  .editorial-points span,
   .empty-stats span {
     width: 100%;
     justify-content: flex-start;
