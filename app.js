@@ -221,6 +221,7 @@ function cacheDom() {
   dom.holdingBadge = document.querySelector("#holdingBadge");
   dom.resultHeadline = document.querySelector("#resultHeadline");
   dom.resultValue = document.querySelector("#resultValue");
+  dom.resultValueNote = document.querySelector("#resultValueNote");
   dom.resultStory = document.querySelector("#resultStory");
   dom.statProfit = document.querySelector("#statProfit");
   dom.statRoi = document.querySelector("#statRoi");
@@ -473,11 +474,11 @@ function applyPreset(preset) {
 
 function hydrateSharedScenario() {
   const params = new URLSearchParams(window.location.search);
-  const sharedCoin = params.get("coin");
-  const sharedAmount = params.get("amount");
-  const sharedBuyDate = params.get("buy");
-  const sharedMode = params.get("mode");
-  const sharedSellDate = params.get("sell");
+  const sharedCoin = params.get("c") || params.get("coin");
+  const sharedAmount = params.get("a") || params.get("amount");
+  const sharedBuyDate = decodeDateParam(params.get("b") || params.get("buy"));
+  const sharedMode = decodeSellMode(params.get("m") || params.get("mode"));
+  const sharedSellDate = decodeDateParam(params.get("s") || params.get("sell"));
 
   if (!sharedCoin || !sharedAmount || !sharedBuyDate) {
     return;
@@ -764,12 +765,13 @@ function renderResult(result) {
   dom.sentimentBadge.textContent = result.sentiment;
   dom.holdingBadge.textContent = `Held ${formatHoldDuration(result.holdDays)}`;
   dom.resultHeadline.textContent = buildHeadline(result);
+  dom.resultValueNote.textContent = `Exact value: ${formatCurrencyPrecise(result.exitValue)}`;
   dom.resultStory.textContent = buildStory(result);
   dom.chartTitle.textContent = result.chartTitle;
   dom.chartStartLabel.textContent = formatCompactCurrency(result.amount);
   dom.chartEndLabel.textContent = formatCompactCurrency(result.exitValue);
 
-  animateValue(dom.resultValue, result.exitValue, formatCurrencyPrecise);
+  animateValue(dom.resultValue, result.exitValue, formatHeroCurrency);
   animateValue(dom.statProfit, result.profit, formatSignedCurrency);
   animateValue(dom.statRoi, result.roi, formatPercent);
   animateValue(dom.statMultiplier, result.multiplier, formatMultiplier);
@@ -866,27 +868,27 @@ function updateShareState(result) {
 }
 
 function buildShareText(result) {
-  const exitLine =
-    result.sellMode === "ath"
-      ? `sold at the post-entry ATH`
-      : result.sellMode === "today"
-        ? `held until today`
-        : `sold on ${formatLongDate(result.sellDate)}`;
-
-  return `${formatCompactCurrency(result.amount)} into ${result.coin.name} on ${formatLongDate(
-    result.buyDate
-  )}, ${exitLine}, could have become ${formatCompactCurrency(result.exitValue)} on IfYouBought.`;
+  return `${result.coin.name}, ${formatShareDate(result.buyDate)} to ${describeExitForShare(
+    result
+  )}: ${formatSocialCurrency(result.amount)} could have become ${formatCompactCurrency(result.exitValue)}.`;
 }
 
 function buildShareUrl(result) {
-  const url = new URL(window.location.href);
+  const url = new URL("/share", window.location.origin);
   const params = new URLSearchParams();
-  params.set("coin", result.coin.symbol);
-  params.set("amount", String(result.amount));
-  params.set("buy", result.buyDate);
-  params.set("mode", result.sellMode);
+  params.set("c", result.coin.symbol);
+  params.set("a", formatQueryNumber(result.amount));
+  params.set("b", encodeDateParam(result.buyDate));
+  params.set("m", encodeSellMode(result.sellMode));
+  params.set("v", formatQueryNumber(result.exitValue));
+  params.set("r", formatQueryNumber(result.roi));
+
+  if (result.sellMode !== "today") {
+    params.set("x", encodeDateParam(timestampToIsoDate(result.exitTimestamp)));
+  }
+
   if (result.sellMode === "custom" && result.sellDate) {
-    params.set("sell", result.sellDate);
+    params.set("s", encodeDateParam(result.sellDate));
   }
   url.search = params.toString();
   return url.toString();
@@ -898,8 +900,9 @@ async function shareToX() {
     return;
   }
 
-  const text = `${state.shareText} ${state.shareUrl}`;
-  const shareTarget = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+  const shareTarget = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+    state.shareText
+  )}&url=${encodeURIComponent(state.shareUrl)}`;
   window.open(shareTarget, "_blank", "noopener,noreferrer");
 }
 
@@ -1240,6 +1243,20 @@ function formatCurrencyPrecise(value) {
   }).format(value);
 }
 
+function formatHeroCurrency(value) {
+  if (Math.abs(value) >= 1000000) {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      notation: "compact",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 1,
+    }).format(value);
+  }
+
+  return formatCurrencyPrecise(value);
+}
+
 function formatCompactCurrency(value) {
   if (Math.abs(value) >= 1000000) {
     return new Intl.NumberFormat("en-US", {
@@ -1254,6 +1271,16 @@ function formatCompactCurrency(value) {
     style: "currency",
     currency: "USD",
     maximumFractionDigits: 0,
+  }).format(value);
+}
+
+function formatSocialCurrency(value) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    notation: Math.abs(value) >= 1000 ? "compact" : "standard",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: Math.abs(value) >= 1000000 ? 1 : 0,
   }).format(value);
 }
 
@@ -1314,6 +1341,15 @@ function formatChartDate(dateString) {
   return formatLongDate(dateString, { month: "short", day: "numeric", year: "2-digit" });
 }
 
+function formatShareDate(dateString) {
+  const [year, month, day] = dateString.split("-").map(Number);
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(Date.UTC(year, month - 1, day)));
+}
+
 function isoToUtcDay(dateString) {
   const [year, month, day] = dateString.split("-").map(Number);
   return Math.floor(Date.UTC(year, month - 1, day) / 1000);
@@ -1334,4 +1370,55 @@ function prefersReducedMotion() {
 
 function capitalize(value) {
   return `${value.charAt(0).toUpperCase()}${value.slice(1)}`;
+}
+
+function describeExitForShare(result) {
+  if (result.sellMode === "ath") {
+    return "post-entry ATH";
+  }
+
+  if (result.sellMode === "today") {
+    return "today";
+  }
+
+  return formatShareDate(result.sellDate);
+}
+
+function encodeDateParam(dateString) {
+  return dateString.replaceAll("-", "");
+}
+
+function decodeDateParam(rawValue) {
+  if (!rawValue) {
+    return "";
+  }
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(rawValue)) {
+    return rawValue;
+  }
+
+  if (/^\d{8}$/.test(rawValue)) {
+    return `${rawValue.slice(0, 4)}-${rawValue.slice(4, 6)}-${rawValue.slice(6, 8)}`;
+  }
+
+  return rawValue;
+}
+
+function encodeSellMode(mode) {
+  return mode === "today" ? "t" : mode === "ath" ? "a" : "c";
+}
+
+function decodeSellMode(rawValue) {
+  if (rawValue === "t") return "today";
+  if (rawValue === "a") return "ath";
+  if (rawValue === "c") return "custom";
+  return rawValue;
+}
+
+function formatQueryNumber(value) {
+  return Number(value).toFixed(2).replace(/\.00$/, "").replace(/(\.\d*[1-9])0+$/, "$1");
+}
+
+function timestampToIsoDate(timestamp) {
+  return new Date(timestamp * 1000).toISOString().slice(0, 10);
 }
