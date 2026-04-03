@@ -26,6 +26,7 @@ const STATIC_TYPES = {
 };
 
 const CACHE_TTL_MS = {
+  "all/coinlist": 2 * 60_000,
   "price": 15_000,
   "pricemulti": 15_000,
   "v2/histoday": 30 * 60_000,
@@ -80,7 +81,7 @@ function createServer() {
 
 async function handleMarketProxy(requestUrl, res) {
   const upstreamPath = requestUrl.pathname.replace(/^\/api\/market\//, "");
-  const allowedPaths = new Set(["price", "pricemulti", "v2/histoday"]);
+  const allowedPaths = new Set(["all/coinlist", "price", "pricemulti", "v2/histoday"]);
 
   if (!allowedPaths.has(upstreamPath)) {
     respondJson(res, 404, {

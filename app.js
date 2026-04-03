@@ -2,8 +2,9 @@ const API_BASE = "/api/market";
 const EXTRA_PARAMS = "IfYouBought";
 const DAY_SECONDS = 86400;
 const LIVE_TICKERS = ["BTC", "ETH", "SOL"];
+const COIN_SEARCH_LIMIT = 120;
 
-const COINS = [
+const FEATURED_COINS = [
   {
     symbol: "BTC",
     name: "Bitcoin",
@@ -170,7 +171,10 @@ const historyCache = new Map();
 const liveCache = new Map();
 
 const state = {
-  selectedCoin: COINS[0],
+  coins: FEATURED_COINS.map((coin) => ({ ...coin })),
+  coinUniverseLoaded: false,
+  coinUniverseError: false,
+  selectedCoin: { ...FEATURED_COINS[0] },
   latestResult: null,
   shareText: "",
   shareUrl: "",
@@ -178,7 +182,7 @@ const state = {
 
 document.addEventListener("DOMContentLoaded", init);
 
-function init() {
+async function init() {
   cacheDom();
   initReveals();
   renderCoinOptions();
@@ -188,9 +192,10 @@ function init() {
   syncSelectedCoinUI();
   updateSellModeUI();
   setResultView("empty");
-  hydrateSharedScenario();
   refreshLiveTicker();
   window.setInterval(refreshLiveTicker, 90000);
+  await loadCoinUniverse();
+  hydrateSharedScenario();
 }
 
 function cacheDom() {
@@ -338,39 +343,146 @@ function seedDefaults() {
 
 function renderCoinOptions(filter = "") {
   const query = filter.trim().toLowerCase();
-  const filteredCoins = COINS.filter((coin) =>
-    `${coin.name} ${coin.symbol} ${coin.note}`.toLowerCase().includes(query)
-  );
+  const filteredCoins = getCoinOptionsForQuery(query);
+  const statusLabel = buildCoinSearchStatus(query, filteredCoins.length);
 
   if (!filteredCoins.length) {
     dom.coinOptionList.innerHTML =
-      '<div class="coin-option-note" style="padding: 18px;">No coins match that search.</div>';
+      `${statusLabel}<div class="coin-option-note" style="padding: 18px;">No coins match that search.</div>`;
     return;
   }
 
-  dom.coinOptionList.innerHTML = filteredCoins
-    .map((coin) => {
-      const isSelected = coin.symbol === state.selectedCoin.symbol;
-      return `
-        <button
-          type="button"
-          class="coin-option"
-          data-coin-symbol="${coin.symbol}"
-          role="option"
-          aria-selected="${isSelected}"
-        >
-          <span class="coin-option-main">
-            <span class="coin-orb" style="${buildOrbStyle(coin)}">${coin.symbol.slice(0, 2)}</span>
-            <span class="coin-option-copy">
-              <span class="coin-option-name">${coin.name}</span>
-              <span class="coin-option-meta">${coin.symbol}</span>
-            </span>
-          </span>
-          <span class="coin-option-note">${coin.note}</span>
-        </button>
-      `;
-    })
-    .join("");
+  dom.coinOptionList.innerHTML = `${statusLabel}${filteredCoins.map(renderCoinOption).join("")}`;
+}
+
+function renderCoinOption(coin) {
+  const isSelected = coin.symbol === state.selectedCoin.symbol;
+  return `
+    <button
+      type="button"
+      class="coin-option"
+      data-coin-symbol="${coin.symbol}"
+      role="option"
+      aria-selected="${isSelected}"
+    >
+      <span class="coin-option-main">
+        <span class="coin-orb" style="${buildOrbStyle(coin)}">${coin.symbol.slice(0, 2)}</span>
+        <span class="coin-option-copy">
+          <span class="coin-option-name">${coin.name}</span>
+          <span class="coin-option-meta">${coin.symbol}</span>
+        </span>
+      </span>
+      <span class="coin-option-note">${coin.note}</span>
+    </button>
+  `;
+}
+
+function getCoinOptionsForQuery(query) {
+  if (!query) {
+    const featured = FEATURED_COINS.map((coin) => getCoinBySymbol(coin.symbol)).filter(Boolean);
+    const remainder = state.coins
+      .filter((coin) => !FEATURED_COINS.some((featuredCoin) => featuredCoin.symbol === coin.symbol))
+      .slice(0, 24);
+    return [...featured, ...remainder];
+  }
+
+  return state.coins
+    .filter((coin) => `${coin.name} ${coin.symbol} ${coin.note}`.toLowerCase().includes(query))
+    .slice(0, COIN_SEARCH_LIMIT);
+}
+
+function buildCoinSearchStatus(query, matchCount) {
+  if (!query) {
+    if (state.coinUniverseLoaded) {
+      return `<div class="coin-search-status">Featured first. Search across ${formatCount(
+        state.coins.length
+      )} supported tokens.</div>`;
+    }
+
+    if (state.coinUniverseError) {
+      return '<div class="coin-search-status">Showing the featured set. The full market list is unavailable right now.</div>';
+    }
+
+    return '<div class="coin-search-status">Loading the full market list in the background...</div>';
+  }
+
+  if (!state.coinUniverseLoaded && !state.coinUniverseError) {
+    return '<div class="coin-search-status">Searching the featured list while the full market list loads...</div>';
+  }
+
+  if (matchCount >= COIN_SEARCH_LIMIT) {
+    return `<div class="coin-search-status">Showing the top ${COIN_SEARCH_LIMIT} matches. Refine the search to narrow it down.</div>`;
+  }
+
+  return `<div class="coin-search-status">${formatCount(matchCount)} match${
+    matchCount === 1 ? "" : "es"
+  }.</div>`;
+}
+
+async function loadCoinUniverse() {
+  try {
+    const payload = await fetchJson(
+      `${API_BASE}/all/coinlist?summary=true&extraParams=${encodeURIComponent(EXTRA_PARAMS)}`
+    );
+    const remoteCoins = Object.values(payload.Data || {})
+      .map(normalizeCoinRecord)
+      .filter(Boolean);
+
+    state.coins = mergeCoinUniverse(remoteCoins);
+    state.selectedCoin = getCoinBySymbol(state.selectedCoin.symbol) || state.selectedCoin;
+    state.coinUniverseLoaded = true;
+    state.coinUniverseError = false;
+  } catch (error) {
+    state.coinUniverseLoaded = false;
+    state.coinUniverseError = true;
+  }
+
+  renderCoinOptions(dom.coinSearch.value);
+}
+
+function normalizeCoinRecord(record) {
+  const symbol = String(record.Symbol || "").toUpperCase().trim();
+  const name = String(record.FullName || record.CoinName || "").trim();
+
+  if (!symbol || !name || symbol.length > 12) {
+    return null;
+  }
+
+  const featured = FEATURED_COINS.find((coin) => coin.symbol === symbol);
+  if (featured) {
+    return { ...featured };
+  }
+
+  return {
+    symbol,
+    name,
+    note: "Market-traded token",
+    launch: "",
+    colors: buildGeneratedColors(symbol),
+  };
+}
+
+function mergeCoinUniverse(remoteCoins) {
+  const bySymbol = new Map(FEATURED_COINS.map((coin) => [coin.symbol, { ...coin }]));
+
+  remoteCoins.forEach((coin) => {
+    if (!bySymbol.has(coin.symbol)) {
+      bySymbol.set(coin.symbol, coin);
+    }
+  });
+
+  return Array.from(bySymbol.values()).sort(sortCoins);
+}
+
+function sortCoins(left, right) {
+  const leftFeatured = FEATURED_COINS.some((coin) => coin.symbol === left.symbol);
+  const rightFeatured = FEATURED_COINS.some((coin) => coin.symbol === right.symbol);
+
+  if (leftFeatured !== rightFeatured) {
+    return leftFeatured ? -1 : 1;
+  }
+
+  return left.name.localeCompare(right.name, "en", { sensitivity: "base" });
 }
 
 function renderPresets() {
@@ -420,11 +532,11 @@ function setSelectedCoin(symbol) {
   state.selectedCoin = coin;
   syncSelectedCoinUI();
 
-  if (dom.buyDateInput.value && dom.buyDateInput.value < coin.launch) {
+  if (coin.launch && dom.buyDateInput.value && dom.buyDateInput.value < coin.launch) {
     dom.buyDateInput.value = coin.launch;
   }
 
-  if (dom.sellDateInput.value && dom.sellDateInput.value < coin.launch) {
+  if (coin.launch && dom.sellDateInput.value && dom.sellDateInput.value < coin.launch) {
     dom.sellDateInput.value = coin.launch;
   }
 
@@ -437,8 +549,8 @@ function syncSelectedCoinUI() {
   dom.selectedCoinSymbol.textContent = state.selectedCoin.symbol;
   dom.selectedCoinOrb.textContent = state.selectedCoin.symbol.slice(0, 2);
   dom.selectedCoinOrb.style.cssText = buildOrbStyle(state.selectedCoin);
-  dom.buyDateInput.min = state.selectedCoin.launch;
-  dom.sellDateInput.min = state.selectedCoin.launch;
+  dom.buyDateInput.min = state.selectedCoin.launch || "";
+  dom.sellDateInput.min = state.selectedCoin.launch || "";
 }
 
 function updateSellModeUI() {
@@ -1010,6 +1122,13 @@ async function getHistory(coin) {
     throw new Error(`No historical data was returned for ${coin.name}.`);
   }
 
+  if (!coin.launch) {
+    coin.launch = history[0].date;
+    if (state.selectedCoin.symbol === coin.symbol) {
+      syncSelectedCoinUI();
+    }
+  }
+
   historyCache.set(coin.symbol, history);
   return history;
 }
@@ -1192,8 +1311,15 @@ function buildOrbStyle(coin) {
   return `background: linear-gradient(135deg, ${coin.colors[0]}, ${coin.colors[1]}); color: #071019;`;
 }
 
+function buildGeneratedColors(symbol) {
+  const seed = symbol.split("").reduce((total, character) => total + character.charCodeAt(0), 0);
+  const hueA = seed % 360;
+  const hueB = (seed * 1.7 + 76) % 360;
+  return [`hsl(${hueA} 86% 66%)`, `hsl(${hueB} 88% 61%)`];
+}
+
 function getCoinBySymbol(symbol) {
-  return COINS.find((coin) => coin.symbol === symbol);
+  return state.coins.find((coin) => coin.symbol === symbol);
 }
 
 function getSellMode() {
@@ -1282,6 +1408,10 @@ function formatSocialCurrency(value) {
     minimumFractionDigits: 0,
     maximumFractionDigits: Math.abs(value) >= 1000000 ? 1 : 0,
   }).format(value);
+}
+
+function formatCount(value) {
+  return Number(value).toLocaleString("en-US");
 }
 
 function formatSignedCurrency(value) {

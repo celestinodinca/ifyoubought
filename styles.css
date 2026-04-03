@@ -742,6 +742,15 @@ h1 {
   overflow: auto;
 }
 
+.coin-search-status {
+  padding: 4px 2px 10px;
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .coin-option {
   display: flex;
   align-items: center;
