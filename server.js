@@ -288,107 +288,173 @@ function buildOgImage(preview) {
     colors: ["#f5b33a", "#51d2ff"],
   };
 
-  const introLine = preview
-    ? `${theme.coinName} | ${formatSocialCurrency(theme.amount)} entry`
-    : "Replay the trade you still think about";
+  const profit = theme.exitValue - theme.amount;
+  const multiplier = theme.amount > 0 ? theme.exitValue / theme.amount : 0;
+  const visual = getShareVisualState(theme, profit, multiplier);
+  const accentA = visual.accentA;
+  const accentB = visual.accentB;
+  const headline = buildShareHeadline(theme, profit);
   const exitLine = preview ? describeExitForImage(theme) : "Today, ATH, or any custom exit";
+  const scenarioLine = preview
+    ? `Bought ${formatShareDate(theme.buyDate)}  •  ${describeExitForCard(theme)}`
+    : "Buy any date  •  Exit today, ATH, or custom";
   const exactLine = preview
     ? `${formatCurrencyPrecise(theme.amount)} on ${formatLongDate(theme.buyDate)}`
     : "Live crypto what-if calculator";
-  const roiLine = preview ? formatPercent(theme.roi) : "+530,566%";
   const valueLine = formatHeroCurrency(theme.exitValue);
-  const chartPath = buildChartPath(theme.roi);
-  const colorA = theme.colors[0];
-  const colorB = theme.colors[1];
+  const roiLine = preview ? formatPercent(theme.roi) : "+530,566%";
+  const multiplierLine = formatMultiplier(multiplier || 5306.7);
+  const profitLine = formatSignedCompactCurrency(profit || 53056602);
+  const chartPath = buildChartPath(theme.roi, {
+    x: 776,
+    y: 352,
+    width: 304,
+    height: 124,
+  });
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="IfYouBought share preview">
   <defs>
-    <radialGradient id="bgGlow" cx="18%" cy="18%" r="90%">
-      <stop offset="0%" stop-color="${escapeXml(colorB)}" stop-opacity="0.34"/>
-      <stop offset="50%" stop-color="#07101d" stop-opacity="0.96"/>
+    <radialGradient id="bgGlow" cx="16%" cy="16%" r="92%">
+      <stop offset="0%" stop-color="${escapeXml(accentB)}" stop-opacity="0.28"/>
+      <stop offset="45%" stop-color="#09111f" stop-opacity="0.96"/>
       <stop offset="100%" stop-color="#04070f"/>
     </radialGradient>
-    <linearGradient id="cardGlow" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="${escapeXml(colorA)}" stop-opacity="0.32"/>
-      <stop offset="100%" stop-color="${escapeXml(colorB)}" stop-opacity="0.28"/>
+    <radialGradient id="edgeGlow" cx="84%" cy="14%" r="66%">
+      <stop offset="0%" stop-color="${escapeXml(accentA)}" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="${escapeXml(accentA)}" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="frameGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="${escapeXml(accentA)}" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="${escapeXml(accentB)}" stop-opacity="0.22"/>
     </linearGradient>
     <linearGradient id="valueFill" x1="0%" y1="0%" x2="100%" y2="0%">
       <stop offset="0%" stop-color="#f8fbff"/>
-      <stop offset="100%" stop-color="${escapeXml(colorB)}"/>
+      <stop offset="100%" stop-color="${escapeXml(accentB)}"/>
     </linearGradient>
     <linearGradient id="chartStroke" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="${escapeXml(colorA)}"/>
-      <stop offset="100%" stop-color="${escapeXml(colorB)}"/>
+      <stop offset="0%" stop-color="${escapeXml(accentA)}"/>
+      <stop offset="100%" stop-color="${escapeXml(accentB)}"/>
     </linearGradient>
     <linearGradient id="chartArea" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="${escapeXml(colorB)}" stop-opacity="0.28"/>
-      <stop offset="100%" stop-color="${escapeXml(colorB)}" stop-opacity="0"/>
+      <stop offset="0%" stop-color="${escapeXml(accentB)}" stop-opacity="0.26"/>
+      <stop offset="100%" stop-color="${escapeXml(accentB)}" stop-opacity="0"/>
     </linearGradient>
+    <pattern id="gridDots" width="18" height="18" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1" fill="rgba(255,255,255,0.08)"/>
+    </pattern>
   </defs>
   <rect width="1200" height="630" fill="url(#bgGlow)"/>
-  <circle cx="950" cy="110" r="170" fill="${escapeXml(colorA)}" fill-opacity="0.12"/>
-  <circle cx="180" cy="520" r="220" fill="${escapeXml(colorB)}" fill-opacity="0.16"/>
-  <rect x="52" y="46" width="1096" height="538" rx="38" fill="#09101d" fill-opacity="0.82" stroke="rgba(255,255,255,0.12)"/>
-  <rect x="72" y="66" width="1056" height="498" rx="32" fill="none" stroke="rgba(255,255,255,0.05)"/>
-  <rect x="94" y="96" width="62" height="62" rx="20" fill="url(#cardGlow)" stroke="rgba(255,255,255,0.12)"/>
-  <rect x="113" y="111" width="24" height="32" rx="8" fill="#f8fbff"/>
-  <text x="182" y="120" fill="rgba(255,255,255,0.92)" font-family="Arial, sans-serif" font-size="22" font-weight="700">IfYouBought</text>
-  <text x="182" y="150" fill="rgba(232,237,245,0.68)" font-family="Arial, sans-serif" font-size="18">${escapeXml(
-    truncateText(introLine, 42)
+  <rect width="1200" height="630" fill="url(#edgeGlow)"/>
+  <rect x="0" y="0" width="1200" height="630" fill="url(#gridDots)" opacity="0.25"/>
+  <circle cx="1024" cy="116" r="164" fill="${escapeXml(accentA)}" fill-opacity="0.10"/>
+  <circle cx="156" cy="560" r="230" fill="${escapeXml(accentB)}" fill-opacity="0.12"/>
+  <rect x="44" y="44" width="1112" height="542" rx="40" fill="#07101c" fill-opacity="0.90" stroke="rgba(255,255,255,0.10)"/>
+  <rect x="44" y="44" width="10" height="542" rx="5" fill="url(#frameGlow)"/>
+  <rect x="68" y="68" width="1064" height="494" rx="32" fill="none" stroke="rgba(255,255,255,0.04)"/>
+  <path d="M 956 44 L 1118 44 Q 1156 44 1156 82 L 1156 196" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>
+
+  <rect x="90" y="90" width="56" height="56" rx="18" fill="url(#frameGlow)" stroke="rgba(255,255,255,0.12)"/>
+  <rect x="107" y="104" width="18" height="28" rx="7" fill="#f8fbff"/>
+  <text x="170" y="113" fill="rgba(255,255,255,0.96)" font-family="Arial, sans-serif" font-size="24" font-weight="700">IfYouBought</text>
+  <text x="170" y="142" fill="rgba(232,237,245,0.60)" font-family="Arial, sans-serif" font-size="16">${escapeXml(
+    truncateText(visual.subtitle, 46)
   )}</text>
-  <rect x="860" y="98" width="216" height="46" rx="23" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.08)"/>
-  <text x="888" y="127" fill="rgba(232,237,245,0.82)" font-family="Arial, sans-serif" font-size="20" font-weight="700">${escapeXml(
-    truncateText(exitLine, 22)
+
+  <rect x="930" y="88" width="178" height="42" rx="21" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.10)"/>
+  <text x="1019" y="115" fill="${escapeXml(accentA)}" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="700" letter-spacing="2">${escapeXml(
+    visual.label
   )}</text>
-  <text x="96" y="238" fill="${escapeXml(colorA)}" font-family="Arial, sans-serif" font-size="18" letter-spacing="6">THE RESULT</text>
-  <text x="96" y="304" fill="rgba(255,255,255,0.96)" font-family="Arial, sans-serif" font-size="72" font-weight="700">${escapeXml(
-    truncateText(preview ? `${theme.coinName} could have become` : "Replay the trade you missed", 28)
+
+  <text x="92" y="196" fill="${escapeXml(accentA)}" font-family="Arial, sans-serif" font-size="16" font-weight="700" letter-spacing="5">${escapeXml(
+    visual.eyebrow
   )}</text>
-  <text x="96" y="394" fill="url(#valueFill)" font-family="Arial, sans-serif" font-size="110" font-weight="700">${escapeXml(
+  <text x="92" y="256" fill="rgba(255,255,255,0.96)" font-family="Arial, sans-serif" font-size="52" font-weight="700">${escapeXml(
+    truncateText(headline.lineOne, 22)
+  )}</text>
+  <text x="92" y="312" fill="rgba(255,255,255,0.96)" font-family="Arial, sans-serif" font-size="52" font-weight="700">${escapeXml(
+    truncateText(headline.lineTwo, 22)
+  )}</text>
+  <text x="92" y="432" fill="url(#valueFill)" font-family="Arial, sans-serif" font-size="118" font-weight="700">${escapeXml(
     valueLine
   )}</text>
-  <text x="96" y="438" fill="rgba(232,237,245,0.74)" font-family="Arial, sans-serif" font-size="24">${escapeXml(
+  <text x="92" y="474" fill="rgba(232,237,245,0.78)" font-family="Arial, sans-serif" font-size="22">${escapeXml(
     exactLine
   )}</text>
-  <rect x="96" y="474" width="214" height="70" rx="24" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)"/>
-  <text x="124" y="503" fill="rgba(232,237,245,0.58)" font-family="Arial, sans-serif" font-size="18" letter-spacing="2">ROI</text>
-  <text x="124" y="533" fill="#8df4d0" font-family="Arial, sans-serif" font-size="34" font-weight="700">${escapeXml(
+  <text x="92" y="508" fill="rgba(232,237,245,0.66)" font-family="Arial, sans-serif" font-size="22">${escapeXml(
+    truncateText(scenarioLine, 42)
+  )}</text>
+
+  <rect x="92" y="534" width="160" height="24" rx="12" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)"/>
+  <text x="172" y="551" fill="rgba(232,237,245,0.78)" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" letter-spacing="2">${escapeXml(
+    exitLine.toUpperCase()
+  )}</text>
+
+  <rect x="750" y="144" width="154" height="86" rx="24" fill="rgba(255,255,255,0.035)" stroke="rgba(255,255,255,0.08)"/>
+  <text x="776" y="174" fill="rgba(232,237,245,0.56)" font-family="Arial, sans-serif" font-size="16" font-weight="700" letter-spacing="2">ROI</text>
+  <text x="776" y="214" fill="${escapeXml(visual.metricColor)}" font-family="Arial, sans-serif" font-size="36" font-weight="700">${escapeXml(
     roiLine
   )}</text>
-  <rect x="334" y="474" width="260" height="70" rx="24" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)"/>
-  <text x="362" y="503" fill="rgba(232,237,245,0.58)" font-family="Arial, sans-serif" font-size="18" letter-spacing="2">SCENARIO</text>
-  <text x="362" y="533" fill="rgba(255,255,255,0.9)" font-family="Arial, sans-serif" font-size="28" font-weight="700">${escapeXml(
-    truncateText(exitLine, 18)
+
+  <rect x="922" y="144" width="154" height="86" rx="24" fill="rgba(255,255,255,0.035)" stroke="rgba(255,255,255,0.08)"/>
+  <text x="948" y="174" fill="rgba(232,237,245,0.56)" font-family="Arial, sans-serif" font-size="16" font-weight="700" letter-spacing="2">MULTIPLE</text>
+  <text x="948" y="214" fill="rgba(255,255,255,0.92)" font-family="Arial, sans-serif" font-size="36" font-weight="700">${escapeXml(
+    multiplierLine
   )}</text>
-  <rect x="704" y="214" width="360" height="268" rx="28" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.08)"/>
+
+  <rect x="750" y="248" width="154" height="86" rx="24" fill="rgba(255,255,255,0.035)" stroke="rgba(255,255,255,0.08)"/>
+  <text x="776" y="278" fill="rgba(232,237,245,0.56)" font-family="Arial, sans-serif" font-size="16" font-weight="700" letter-spacing="2">${escapeXml(
+    profit >= 0 ? "PROFIT" : "LOSS"
+  )}</text>
+  <text x="776" y="318" fill="${escapeXml(visual.metricColor)}" font-family="Arial, sans-serif" font-size="36" font-weight="700">${escapeXml(
+    profitLine
+  )}</text>
+
+  <rect x="922" y="248" width="154" height="86" rx="24" fill="rgba(255,255,255,0.035)" stroke="rgba(255,255,255,0.08)"/>
+  <text x="948" y="278" fill="rgba(232,237,245,0.56)" font-family="Arial, sans-serif" font-size="16" font-weight="700" letter-spacing="2">EXIT</text>
+  <text x="948" y="318" fill="rgba(255,255,255,0.92)" font-family="Arial, sans-serif" font-size="28" font-weight="700">${escapeXml(
+    truncateText(exitLine, 12)
+  )}</text>
+
+  <rect x="750" y="352" width="326" height="162" rx="28" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.08)"/>
+  <text x="776" y="382" fill="rgba(232,237,245,0.56)" font-family="Arial, sans-serif" font-size="16" font-weight="700" letter-spacing="2">PORTFOLIO CURVE</text>
+  <text x="776" y="410" fill="rgba(255,255,255,0.90)" font-family="Arial, sans-serif" font-size="24" font-weight="700">${escapeXml(
+    truncateText(`${formatShareDate(theme.buyDate)} to ${exitLine}`, 22)
+  )}</text>
+  <line x1="776" y1="452" x2="1050" y2="452" stroke="rgba(255,255,255,0.08)" stroke-dasharray="4 10"/>
+  <line x1="776" y1="486" x2="1050" y2="486" stroke="rgba(255,255,255,0.08)" stroke-dasharray="4 10"/>
   <path d="${chartPath.area}" fill="url(#chartArea)"/>
   <path d="${chartPath.line}" fill="none" stroke="url(#chartStroke)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="1028" cy="286" r="14" fill="${escapeXml(colorB)}" fill-opacity="0.18"/>
-  <circle cx="1028" cy="286" r="5" fill="#f8fbff"/>
-  <text x="734" y="252" fill="rgba(232,237,245,0.58)" font-family="Arial, sans-serif" font-size="18" letter-spacing="2">PORTFOLIO CURVE</text>
-  <text x="734" y="282" fill="rgba(255,255,255,0.88)" font-family="Arial, sans-serif" font-size="28" font-weight="700">${escapeXml(
-    truncateText(preview ? `${formatShareDate(theme.buyDate)} to ${exitLine}` : "Buy to exit", 24)
-  )}</text>
-  <text x="734" y="440" fill="rgba(232,237,245,0.6)" font-family="Arial, sans-serif" font-size="18">${escapeXml(
+  <circle cx="${chartPath.lastX}" cy="${chartPath.lastY}" r="12" fill="${escapeXml(accentB)}" fill-opacity="0.18"/>
+  <circle cx="${chartPath.lastX}" cy="${chartPath.lastY}" r="4" fill="#f8fbff"/>
+  <text x="776" y="502" fill="rgba(232,237,245,0.60)" font-family="Arial, sans-serif" font-size="16">${escapeXml(
     preview ? formatCurrencyPrecise(theme.amount) : "$1,000"
   )}</text>
-  <text x="956" y="440" fill="rgba(232,237,245,0.92)" font-family="Arial, sans-serif" font-size="18">${escapeXml(
-    formatHeroCurrency(theme.exitValue)
+  <text x="962" y="502" fill="rgba(232,237,245,0.92)" font-family="Arial, sans-serif" font-size="16">${escapeXml(
+    valueLine
   )}</text>
+
+  <rect x="750" y="532" width="326" height="30" rx="15" fill="rgba(255,255,255,0.035)" stroke="rgba(255,255,255,0.06)"/>
+  <text x="776" y="552" fill="rgba(232,237,245,0.72)" font-family="Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="2">IF YOU BOUGHT // REPLAY THE TRADE YOU STILL THINK ABOUT</text>
 </svg>`;
 }
 
-function buildChartPath(roi) {
-  const amplitude = Math.max(48, Math.min(180, 54 + Math.log10(Math.abs(roi) + 12) * 38));
-  const startY = 426;
+function buildChartPath(roi, frame) {
+  const { x, y, width, height } = frame;
+  const amplitude = Math.max(height * 0.24, Math.min(height * 0.78, 18 + Math.log10(Math.abs(roi) + 12) * 24));
+  const startX = x;
+  const endX = x + width;
+  const baseY = y + height;
+  const startY = baseY - height * 0.12;
   const midY = startY - amplitude * 0.38;
   const peakY = startY - amplitude;
   const endY = startY - amplitude * 0.62;
 
   return {
-    line: `M 734 ${startY} C 790 ${startY - 4}, 832 ${midY + 18}, 888 ${midY} S 982 ${peakY + 30}, 1028 ${peakY} S 1084 ${endY + 16}, 1110 ${endY}`,
-    area: `M 734 ${startY} C 790 ${startY - 4}, 832 ${midY + 18}, 888 ${midY} S 982 ${peakY + 30}, 1028 ${peakY} S 1084 ${endY + 16}, 1110 ${endY} L 1110 454 L 734 454 Z`,
+    line: `M ${startX} ${startY} C ${startX + width * 0.18} ${startY - 4}, ${startX + width * 0.34} ${midY + 14}, ${startX + width * 0.46} ${midY} S ${startX + width * 0.73} ${peakY + 24}, ${startX + width * 0.82} ${peakY} S ${startX + width * 0.95} ${endY + 14}, ${endX} ${endY}`,
+    area: `M ${startX} ${startY} C ${startX + width * 0.18} ${startY - 4}, ${startX + width * 0.34} ${midY + 14}, ${startX + width * 0.46} ${midY} S ${startX + width * 0.73} ${peakY + 24}, ${startX + width * 0.82} ${peakY} S ${startX + width * 0.95} ${endY + 14}, ${endX} ${endY} L ${endX} ${baseY} L ${startX} ${baseY} Z`,
+    lastX: endX,
+    lastY: endY,
   };
 }
 
@@ -455,6 +521,94 @@ function describeExitForImage(preview) {
   return `Custom | ${formatShareDate(preview.sellDate)}`;
 }
 
+function describeExitForCard(preview) {
+  if (preview.mode === "ath") {
+    return preview.exitDate ? `ATH exit ${formatShareDate(preview.exitDate)}` : "ATH exit";
+  }
+
+  if (preview.mode === "today") {
+    return "Held to today";
+  }
+
+  return `Sold ${formatShareDate(preview.sellDate || preview.buyDate)}`;
+}
+
+function getShareVisualState(preview, profit, multiplier) {
+  const isNegative = profit < 0;
+  const isHuge = preview.exitValue >= 1_000_000 || preview.roi >= 10_000;
+  const accentA = isNegative ? "#ff6b8f" : preview.colors[0];
+  const accentB = isNegative ? "#f5b33a" : preview.colors[1];
+
+  if (isNegative) {
+    return {
+      label: "PAINFUL TIMING",
+      eyebrow: "THE EXIT THAT STUNG",
+      subtitle: "The loss card everyone recognizes instantly.",
+      accentA,
+      accentB,
+      metricColor: "#ffb1c3",
+    };
+  }
+
+  if (preview.mode === "ath") {
+    return {
+      label: isHuge ? "PERFECT EXIT" : "CAUGHT THE PEAK",
+      eyebrow: "THE CLEANEST POSSIBLE SELL",
+      subtitle: "If hindsight traded perfectly, this is the number.",
+      accentA,
+      accentB,
+      metricColor: "#8df4d0",
+    };
+  }
+
+  if (isHuge) {
+    return {
+      label: "MISSED MILLIONS",
+      eyebrow: "THE TRADE THAT GOT AWAY",
+      subtitle: "The screenshot that makes the feed stop.",
+      accentA,
+      accentB,
+      metricColor: "#8df4d0",
+    };
+  }
+
+  if (multiplier >= 10) {
+    return {
+      label: "LEGENDARY HOLD",
+      eyebrow: "CONVICTION AGED WELL",
+      subtitle: "Built to look unmistakably like IfYouBought.",
+      accentA,
+      accentB,
+      metricColor: "#8df4d0",
+    };
+  }
+
+  return {
+    label: "WHAT IF",
+    eyebrow: "REPLAY THE TRADE",
+    subtitle: "The premium crypto what-if card.",
+    accentA,
+    accentB,
+    metricColor: "#8df4d0",
+  };
+}
+
+function buildShareHeadline(preview, profit) {
+  const entryAmount = formatSocialCurrency(preview.amount);
+
+  if (profit < 0) {
+    return {
+      lineOne: `YOUR ${entryAmount} IN ${preview.symbol}`,
+      lineTwo: "WOULD BE LEFT AT",
+    };
+  }
+
+  return {
+    lineOne: `YOUR ${entryAmount} IN ${preview.symbol}`,
+    lineTwo: "COULD HAVE BECOME",
+  };
+}
+
 function decodeDateParam(rawValue) {
   if (!rawValue) {
     return "";
@@ -517,6 +671,18 @@ function formatPercent(value) {
   return `${safeValue >= 0 ? "+" : "-"}${Math.abs(safeValue).toLocaleString("en-US", {
     maximumFractionDigits: Math.abs(safeValue) >= 100 ? 0 : 2,
   })}%`;
+}
+
+function formatMultiplier(value) {
+  return `${value.toLocaleString("en-US", {
+    minimumFractionDigits: value >= 100 ? 0 : 1,
+    maximumFractionDigits: value >= 100 ? 1 : 2,
+  })}x`;
+}
+
+function formatSignedCompactCurrency(value) {
+  const sign = value >= 0 ? "+" : "-";
+  return `${sign}${formatHeroCurrency(Math.abs(value))}`;
 }
 
 function formatLongDate(dateString) {
